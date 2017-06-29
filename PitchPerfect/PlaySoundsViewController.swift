@@ -19,6 +19,7 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var reverbButton: UIButton!
     @IBOutlet weak var stopButton: UIButton!
     
+    @IBOutlet var buttonCollection: [UIButton]!
     
     var recordedAudioURL:URL!
     var audioFile:AVAudioFile!
@@ -59,8 +60,12 @@ class PlaySoundsViewController: UIViewController {
         super.viewDidLoad()
         
         setupAudio()
-
-        // Do any additional setup after loading the view.
+        
+        for button in buttonCollection {
+             button.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+        }
+       
+     
     }
 
     //  handle case where audio continues to play after navigating back to the record screen
@@ -76,11 +81,6 @@ class PlaySoundsViewController: UIViewController {
         configureUI(.notPlaying)
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
 
 
 }

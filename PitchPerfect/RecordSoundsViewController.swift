@@ -9,17 +9,13 @@
 import UIKit
 import AVFoundation
 
-class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
+class RecordSoundViewController: UIViewController {
 
     @IBOutlet weak var recordingLabel: UILabel!
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var stopRecordingButton: UIButton!
     
     var audioRecorder: AVAudioRecorder!
-    
-    enum PlayState {
-        case notPlaying, playing
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,13 +24,13 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        configureUI(.notPlaying)
+        toggleUI(active: false)
     }
 
 
     @IBAction func recordAudio(_ sender: Any) {
         
-        configureUI(.playing)
+        toggleUI(active: true)
         
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask, true)[0] as String
         let recordingName = "recordedVoice.wav"
@@ -54,28 +50,30 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     }
     @IBAction func stopRecording(_ sender: Any) {
         
-        configureUI(.notPlaying)
+       toggleUI(active: false)
         audioRecorder.stop()
     }
     
-    func configureUI(_ playstate: PlayState) {
-        switch playstate {
-        case .playing:
-            recordingLabel.text = "Recording in Progress"
-            stopRecordingButton.isEnabled = true
-            recordButton.isEnabled = false
+    func toggleUI(active isRecording: Bool) {
+      
+        recordingLabel.text = isRecording ? "Recording in Progress" : "Tap to Record"
+            stopRecordingButton.isEnabled = isRecording
+            recordButton.isEnabled = !isRecording
 
-        default:
-            recordingLabel.text = "Tap to Record"
-            stopRecordingButton.isEnabled = false
-            recordButton.isEnabled = true
-            
-
+    }   
+    
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "stopRecording" {
+            let playSoundsVC = segue.destination as! PlaySoundsViewController
+            let recordedAudioURL = sender as! URL
+            playSoundsVC.recordedAudioURL = recordedAudioURL
         }
     }
-    
-    
-   // Mark: AV implentation
+}
+
+extension RecordSoundViewController: AVAudioRecorderDelegate {
+    // Mark: AV implentation
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         if flag {
@@ -88,13 +86,7 @@ class RecordSoundViewController: UIViewController, AVAudioRecorderDelegate {
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
         print("issue with encoding")
     }
+
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "stopRecording" {
-            let playSoundsVC = segue.destination as! PlaySoundsViewController
-            let recordedAudioURL = sender as! URL
-            playSoundsVC.recordedAudioURL = recordedAudioURL
-        }
-    }
 }
 
